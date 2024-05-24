@@ -3,7 +3,7 @@ from pyglet.gl import GL_TRIANGLES
 from pyglet.math import Mat4, Vec3, Vec4
 from pyglet.gl import *
 
-from object_3d import Object3D
+from object3d import Object3D
 from ui import UI
 
 class RenderWindow(pyglet.window.Window):
@@ -16,7 +16,7 @@ class RenderWindow(pyglet.window.Window):
         '''
         View (camera) parameters
         '''
-        self.cam_eye = Vec3(20,20,20)
+        self.cam_eye = Vec3(15,15,15)
         self.cam_target = Vec3(0,0,0)
         self.cam_vup = Vec3(0,1,0)
         self.view_mat = None
@@ -27,11 +27,11 @@ class RenderWindow(pyglet.window.Window):
         self.z_far = 100
         self.fov = 60
         self.proj_mat = None
+        self.view_proj = None
         '''
         Uniforms (Lighting)
         '''
-        self.view_proj = None
-        self.dir_light = Vec3(4, 3, -6).normalize()
+        self.dir_light = Vec3(5,10,10)
         
         self.objects: list[Object3D] = []
         self.ui = UI(self)
@@ -94,9 +94,8 @@ class RenderWindow(pyglet.window.Window):
                 object.calc_transform_mat()
                 
             object.group.shader_program['view_proj'] = self.view_proj
-            if isinstance(object, Object3D):
-                object.group.shader_program['dir_light'] = self.dir_light
-                object.group.shader_program['cam_eye'] = self.cam_eye
+            object.group.shader_program['lpos'] = self.dir_light
+            object.group.shader_program['cam_eye'] = self.cam_eye
         
     def fixed_update(self,dt) -> None:
         pass

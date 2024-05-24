@@ -1,5 +1,5 @@
 from pyglet.util import asstr
-from pyglet.math import Vec2, Vec3
+from pyglet.math import Vec3
 
 from .geom import Geometry
 
@@ -20,7 +20,6 @@ def parse_obj_file(filename, file=None):
     uvs = [[0., 0.]]
     geo.normals = []
     geo.uvs = []
-    geo.n = []
     geo.b = []
     geo.t = []
 
@@ -83,10 +82,8 @@ def parse_obj_file(filename, file=None):
                     v01 = t1[1] - t0[1]
                     v02 = t2[1] - t0[1]
                     
-                    tv = (p01v * v02 - p02v * u02).normalize()
-                    bv = (-p01v * v01 + p02v * u01).normalize()
-                    tv = Vec3()
-                    bv = Vec3()
+                    tv = (p01v * v02 - p02v * v01).normalize()
+                    bv = (-p01v * u02 + p02v * u01).normalize()
                     
                     geo.t += [*tv.xyz] * 3
                     geo.b += [*bv.xyz] * 3
