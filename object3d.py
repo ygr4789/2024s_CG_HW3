@@ -32,13 +32,15 @@ class CustomGroup(pyglet.graphics.Group):
         u_image2Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture2".encode()))
         u_image3Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture3".encode()))
         u_image4Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture4".encode()))
-        u_image4Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture5".encode()))
+        u_image5Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture5".encode()))
+        u_image6Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture6".encode()))
         glUniform1i(u_image0Location, 0)
         glUniform1i(u_image1Location, 1)
         glUniform1i(u_image2Location, 2)
         glUniform1i(u_image3Location, 3)
         glUniform1i(u_image4Location, 4)
-        glUniform1i(u_image4Location, 5)
+        glUniform1i(u_image5Location, 5)
+        glUniform1i(u_image6Location, 6)
         
     def set_state(self):
         self.shader_program.use()
@@ -59,6 +61,8 @@ class CustomGroup(pyglet.graphics.Group):
             glBindTexture(self.textures["specular"].target, self.textures["specular"].id)
             glActiveTexture(GL_TEXTURE5)
             glBindTexture(self.textures["opacity"].target, self.textures["opacity"].id)
+            glActiveTexture(GL_TEXTURE6)
+            glBindTexture(self.textures["metallic"].target, self.textures["metallic"].id)
 
     def unset_state(self):
         self.shader_program.stop()
@@ -110,4 +114,5 @@ class Object3D:
             "roughness" : self.material.roughness,
             "specular" : self.material.specular,
             "opacity" : self.material.opacity,
+            "metallic" : self.material.metallic,
         }

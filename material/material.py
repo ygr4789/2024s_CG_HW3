@@ -19,13 +19,15 @@ class Material:
         ambient=[0.1, 0.1, 0.1],
         specular=[0.8, 0.8, 0.8],
         emission=[0.0, 0.0, 0.0],
-        shininess=[0.02, 0.02, 0.02],
+        roughness=[0.5, 0.5, 0.5],
+        metallic=[0.0, 0.0, 0.0],
         opacity=[1.0, 1.0, 1.0],
         bump=[0.5, 0.5, 1.0],
     ):
         self.diffuse = load_texture(diffuse)
         self.ambient = load_texture(ambient)
         self.specular = load_texture(specular)
-        self.roughness = load_texture(shininess)
-        self.normal = load_texture(bump)
+        self.roughness = load_texture(roughness)
+        self.metallic = load_texture(metallic)
         self.opacity = load_texture(opacity)
+        self.normal = load_texture(bump)

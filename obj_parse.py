@@ -64,9 +64,11 @@ def load_material_library(filename):
             elif values[0] == 'Ke':
                 mat_args["emission"] = list(map(float, values[1:]))
             elif values[0] == 'Ns':
-                mat_args["shininess"] = [min(1.0, float(values[1])/255)] * 3
+                mat_args["roughness"] = [(2/(float(values[1])+2)) ** (1/4)] * 3 # convert shininess to roughness
             elif values[0] == 'd':
                 mat_args["opacity"] = [float(values[1])] * 3
+            elif values[0] == 'refl':
+                mat_args["metallic"] = [float(values[1])] * 3
             elif values[0].startswith('map'):
                 tex_path = find_file(location, values[-1])
                 if tex_path:
@@ -75,13 +77,16 @@ def load_material_library(filename):
                     elif values[0] == 'map_Ka':
                         mat_args["ambient"] = tex_path
                     elif values[0] == 'map_Ks':
+                        pass
                         mat_args["specular"] = tex_path
                     elif values[0] == 'map_Ke':
                         mat_args["emission"] = tex_path
                     elif values[0] == 'map_Ns':
-                        mat_args["shininess"] = tex_path
+                        mat_args["roughness"] = tex_path
                     elif values[0] == 'map_d':
                         mat_args["opacity"] = tex_path
+                    elif values[0] == 'map_refl' or values[0] == 'map_Refl':
+                        mat_args["metallic"] = tex_path
                     elif values[0] == 'map_bump' or values[0] == 'map_Bump':
                         mat_args["bump"] = tex_path
 
@@ -95,7 +100,7 @@ def load_material_library(filename):
 
 def parse_obj(filename, file=None):
     materials = {}
-    mesh_list = []
+    mesh_list: list[Mesh] = []
     
     location = os.path.dirname(filename)
     

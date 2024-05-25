@@ -44,11 +44,9 @@ class Control:
     def bind_points(self, points: List[Vec3] = []):
         self.points = points
 
-    @check_disabled
     def on_key_press(self, symbol, modifier):
         self.data[symbol] = True
     
-    @check_disabled
     def on_key_release(self, symbol, modifier):
         self.data[symbol] = False
         if symbol == key.ESCAPE:
@@ -77,44 +75,10 @@ class Control:
             self.points[i] = target
         
         elif self[mouse.LEFT]:
-            cam_eye = self.window.cam_eye
-            cam_target = self.window.cam_target
-            cam_vup = self.window.cam_vup
-            cam_t_to_e = cam_eye - cam_target
-            cam_z = (cam_target - cam_eye).normalize()
-            cam_x = cam_vup.cross(cam_z)
-            cam_y = cam_z.cross(cam_x)
-            
-            sth = cam_vup.cross(cam_z).dot(cam_x)
-            up = cam_vup.dot(cam_z) > 0
-            d_pi = -dx * 0.01
-            d_th = -dy * 0.01
-            if up and sth + d_th < 0 : d_th = 0
-            if not up and sth - d_th < 0 : d_th = 0
-            R1 = Mat4.from_rotation(d_pi, cam_vup)
-            R2 = Mat4.from_rotation(d_th, cam_x)
-            
-            R = R1 @ R2 
-            new_t_to_e = Vec4(*cam_t_to_e.xyz, 0)
-            new_t_to_e = (R @ new_t_to_e).xyz
-            self.window.cam_eye = cam_target + new_t_to_e
+            self.rotate_screen(dx, dy)
             
         elif self[mouse.RIGHT]:
-            cam_eye = self.window.cam_eye
-            cam_target = self.window.cam_target
-            cam_vup = self.window.cam_vup
-            cam_dist = cam_target.distance(cam_eye)
-            cam_z = (cam_target - cam_eye).normalize()
-            cam_x = cam_vup.cross(cam_z)
-            cam_y = cam_z.cross(cam_x)
-            
-            fov = self.window.fov
-            w_width = 2 * cam_dist * math.tan(fov * math.pi / 360)
-            s_width = self.window.width
-            
-            cam_update = (cam_x * dx - cam_y * dy) * (w_width / s_width)
-            self.window.cam_target += cam_update
-            self.window.cam_eye += cam_update
+            self.move_screen(dx, dy)
 
     @check_disabled
     def on_mouse_drag(self, x, y, dx, dy, button, modifier):
@@ -146,8 +110,51 @@ class Control:
 
     @check_disabled
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        self.zoomout_screen(scroll_y)
+        
+    def zoomout_screen(self, scroll_y):
         cam_eye = self.window.cam_eye
         cam_target = self.window.cam_target
         cam_dir = cam_target - cam_eye
         cam_update = cam_dir * scroll_y * 0.1
+        self.window.cam_eye += cam_update
+        
+    def rotate_screen(self, dx, dy):
+        cam_eye = self.window.cam_eye
+        cam_target = self.window.cam_target
+        cam_vup = self.window.cam_vup
+        cam_t_to_e = cam_eye - cam_target
+        cam_z = (cam_target - cam_eye).normalize()
+        cam_x = cam_vup.cross(cam_z)
+        cam_y = cam_z.cross(cam_x)
+        
+        sth = cam_vup.cross(cam_z).dot(cam_x)
+        up = cam_vup.dot(cam_z) > 0
+        d_pi = -dx * 0.01
+        d_th = -dy * 0.01
+        if up and sth + d_th < 0 : d_th = 0
+        if not up and sth - d_th < 0 : d_th = 0
+        R1 = Mat4.from_rotation(d_pi, cam_vup)
+        R2 = Mat4.from_rotation(d_th, cam_x)
+        
+        R = R1 @ R2 
+        new_t_to_e = Vec4(*cam_t_to_e.xyz, 0)
+        new_t_to_e = (R @ new_t_to_e).xyz
+        self.window.cam_eye = cam_target + new_t_to_e
+        
+    def move_screen(self, dx, dy):
+        cam_eye = self.window.cam_eye
+        cam_target = self.window.cam_target
+        cam_vup = self.window.cam_vup
+        cam_dist = cam_target.distance(cam_eye)
+        cam_z = (cam_target - cam_eye).normalize()
+        cam_x = cam_vup.cross(cam_z)
+        cam_y = cam_z.cross(cam_x)
+        
+        fov = self.window.fov
+        w_width = 2 * cam_dist * math.tan(fov * math.pi / 360)
+        s_width = self.window.width
+        
+        cam_update = (cam_x * dx - cam_y * dy) * (w_width / s_width)
+        self.window.cam_target += cam_update
         self.window.cam_eye += cam_update

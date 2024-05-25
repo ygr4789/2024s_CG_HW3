@@ -2,7 +2,7 @@ from pyglet.math import Vec3
 from pyglet.graphics.shader import ShaderProgram
 
 class DirLight:
-    def __init__(self, dir: Vec3 = Vec3(10, 10, 10), color:Vec3 = Vec3(1, 1, 1), power: float = 1):
+    def __init__(self, dir: Vec3 = Vec3(10, 10, 10), color:Vec3 = Vec3(1, 1, 1), power: float = 10):
         self.dir = dir
         self.color = color
         self.power = power
@@ -13,7 +13,7 @@ class DirLight:
         
         
 class PointLight:
-    def __init__(self, pos: Vec3 = Vec3(10, 10, 10), color:Vec3 = Vec3(1, 1, 1), power: float = 1):
+    def __init__(self, pos: Vec3 = Vec3(10, 10, 10), color:Vec3 = Vec3(1, 1, 1), power: float = 100):
         self.pos = pos
         self.color = color
         self.power = power

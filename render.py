@@ -5,7 +5,6 @@ from pyglet.gl import *
 
 from object3d import Object3D
 from light import *
-from ui import UI
 
 class RenderWindow(pyglet.window.Window):
     '''
@@ -37,7 +36,6 @@ class RenderWindow(pyglet.window.Window):
         self.point_lights: list[PointLight] = []
         
         self.objects: list[Object3D] = []
-        self.ui = UI(self)
         self.setup()
     
     def setup(self) -> None:
@@ -46,7 +44,7 @@ class RenderWindow(pyglet.window.Window):
         glEnable(GL_CULL_FACE)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glClearColor(1, 1, 1, 1)
+        glClearColor(0.1, 0.1, 0.1, 1)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LINE_SMOOTH)
         self.calc_matrices()
@@ -69,7 +67,6 @@ class RenderWindow(pyglet.window.Window):
     def on_draw(self) -> None:
         self.clear()
         self.batch.draw()
-        self.ui.render()
         
     def on_resize(self, width, height):
         glViewport(0, 0, *self.get_framebuffer_size())

@@ -18,6 +18,7 @@ uniform sampler2D texture2;
 uniform sampler2D texture3;
 uniform sampler2D texture4;
 uniform sampler2D texture5;
+uniform sampler2D texture6;
 
 
 // global vairables
@@ -27,7 +28,11 @@ vec3 k_s;
 vec3 k_d;
 vec3 n;
 float shininess;
-float alpha;
+float opacity;
+float oplus;
+
+vec3 k_m;
+float refl;
 
 // lights
 
@@ -46,7 +51,7 @@ struct point_light {
 vec3 calc_dir_light(dir_light light);
 vec3 calc_point_light(point_light light);
 
-#define NR_DIR_LIGHTS 1
+#define NR_DIR_LIGHTS 4
 #define NR_POINT_LIGHTS 10
 
 uniform float ambient_power;
@@ -54,26 +59,38 @@ uniform vec3 cam_eye;
 uniform dir_light dir_lights[NR_DIR_LIGHTS];
 uniform point_light point_lights[NR_POINT_LIGHTS];
 
-float light_coeff = 10.0;
+float light_coeff = 40.0;
+
+#define M_PI 3.1415926535897932384626433832795
 
 void main() {
     vec4 tex0_v = texture2D(texture0, tex_coord); // diffuse
     vec4 tex1_v = texture2D(texture1, tex_coord); // ambient
     vec4 tex2_v = texture2D(texture2, tex_coord); // normal
-    vec4 tex3_v = texture2D(texture3, tex_coord); // roughness -> shininess
+    vec4 tex3_v = texture2D(texture3, tex_coord); // roughness
     vec4 tex4_v = texture2D(texture4, tex_coord); // specular
     vec4 tex5_v = texture2D(texture5, tex_coord); // opacity
+    vec4 tex6_v = texture2D(texture6, tex_coord); // metallic
 
     k_a = tex1_v.rgb;
     k_s = tex4_v.rgb;
     k_d = tex0_v.rgb;
-    alpha = tex5_v.r;
-    shininess = tex3_v.r * 255;
+    opacity = tex5_v.r;
+    
+    float roughness = tex3_v.r + 0.0001;
+    float alpha = pow(roughness, 2);
+    k_s /= (M_PI * 10 * pow(alpha, 2)); // custom roughness->specular conv
+    shininess = 2 / pow(alpha, 2) - 2; // custom roughness->shininess conv
 
     n = normalize(normal);
     mat3 tbn = mat3(t, b, n);
     vec3 tbn_coord = tex2_v.rgb * 2 - 1;
     n = normalize(tbn * tbn_coord);
+    
+    // pseudo-bsdf implementation
+    refl = tex6_v.r;
+    k_m = refl * k_d;
+    k_d *= (1 - refl);
 
     vec3 ambient = ambient_power * k_a;
     vec3 light = ambient;
@@ -83,7 +100,7 @@ void main() {
     for(int i=0; i<NR_POINT_LIGHTS; i++)
         light += calc_point_light(point_lights[i]);
     
-    out_color = vec4(light, alpha);
+    out_color = vec4(light, opacity + oplus);
 }
 
 vec3 calc_dir_light(dir_light light) {
@@ -100,8 +117,9 @@ vec3 calc_dir_light(dir_light light) {
 
     vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
     vec3 specular = light_intensity * k_s * pow(glare, shininess);
+    vec3 reflect = light_intensity * k_m * pow(glare, 8);
     
-    return diffuse + specular;
+    return diffuse + specular + reflect;
 }
 
 vec3 calc_point_light(point_light light) {
@@ -118,6 +136,7 @@ vec3 calc_point_light(point_light light) {
     
     vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
     vec3 specular = light_intensity * k_s * pow(glare, shininess);
+    vec3 reflect = light_intensity * k_m * pow(glare, 8);
     
-    return diffuse + specular;
+    return diffuse + specular + reflect;
 }
