@@ -44,15 +44,13 @@ class Control:
     def bind_points(self, points: List[Vec3] = []):
         self.points = points
 
-    def update(self, vector):
-        pass
-
     @check_disabled
     def on_key_press(self, symbol, modifier):
-        pass
+        self.data[symbol] = True
     
     @check_disabled
     def on_key_release(self, symbol, modifier):
+        self.data[symbol] = False
         if symbol == key.ESCAPE:
             pyglet.app.exit()
 

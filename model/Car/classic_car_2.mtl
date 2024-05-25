@@ -1,0 +1,84 @@
+# Blender 4.1.1 MTL File: 'classic_car_2.blend'
+# www.blender.org
+
+newmtl Material.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.078319 0.072706 0.057306
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Material.003
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd willys_DefaultMaterial_BaseColor.png
+map_Ns willys_DefaultMaterial_Roughness.png
+map_refl willys_DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 willys_DefaultMaterial_Normal.png
+
+newmtl Material.012
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd disks_DefaultMaterial_BaseColor.png
+map_Ns disks_DefaultMaterial_Roughness.png
+map_refl disks_DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 disks_DefaultMaterial_Normal.png
+
+newmtl Material.013
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.500000
+illum 9
+map_Kd glass_DefaultMaterial_BaseColor.png
+map_Ns glass_DefaultMaterial_Roughness.png
+map_refl glass_DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 glass_DefaultMaterial_Normal.png
+
+newmtl Material.014
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd inside_DefaultMaterial_BaseColor.png
+map_Ns inside_DefaultMaterial_Roughness.png
+map_refl inside_DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 inside_DefaultMaterial_Normal.png
+
+newmtl Material.015
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tieres_DefaultMaterial_BaseColor.png
+map_Ns tieres_DefaultMaterial_Roughness.png
+map_refl tieres_DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 tieres_DefaultMaterial_Normal.png
+
+newmtl Material.016
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd metal_Material.004_BaseColor.png
+map_Ns metal_Material.004_Roughness.png
+map_refl metal_Material.004_Height.png
+map_Bump -bm 1.000000 metal_Material.004_Normal.png

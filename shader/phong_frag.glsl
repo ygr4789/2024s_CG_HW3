@@ -1,4 +1,7 @@
 #version 330
+
+// in-out
+
 in vec2 tex_coord;
 in vec3 pos;
 in vec3 normal;
@@ -7,59 +10,102 @@ in vec3 t;
 
 out vec4 out_color;
 
+// textures
+
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform sampler2D texture3;
 uniform sampler2D texture4;
+uniform sampler2D texture5;
 
-uniform vec3 lpos;
-uniform vec3 cam_eye;
 
-float I_a = 0.2;
-float I_l = 1.0;
+// global vairables
+
+vec3 k_a;
+vec3 k_s;
+vec3 k_d;
+vec3 n;
+float shininess;
+float alpha;
+
+// lights
 
 struct dir_light {
     vec3 dir;
     vec3 color;
-    float I0;
+    float power;
 };
 
 struct point_light {
     vec3 pos;
     vec3 color;
-    float I0;
+    float power;
 };
 
-vec3 calc_dir_light(dir_light light, vec3 normal, vec3 viewDir);
-vec3 calc_point_light(point_light light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 calc_dir_light(dir_light light);
+vec3 calc_point_light(point_light light);
 
-#define NR_DIR_LIGHTS 4
-#define NR_POINT_LIGHTS 4
+#define NR_DIR_LIGHTS 1
+#define NR_POINT_LIGHTS 10
 
+uniform float ambient_power;
+uniform vec3 cam_eye;
 uniform dir_light dir_lights[NR_DIR_LIGHTS];
 uniform point_light point_lights[NR_POINT_LIGHTS];
+
+float light_coeff = 10.0;
 
 void main() {
     vec4 tex0_v = texture2D(texture0, tex_coord); // diffuse
     vec4 tex1_v = texture2D(texture1, tex_coord); // ambient
     vec4 tex2_v = texture2D(texture2, tex_coord); // normal
-    vec4 tex3_v = texture2D(texture3, tex_coord); // roughness
+    vec4 tex3_v = texture2D(texture3, tex_coord); // roughness -> shininess
     vec4 tex4_v = texture2D(texture4, tex_coord); // specular
+    vec4 tex5_v = texture2D(texture5, tex_coord); // opacity
 
-    vec3 k_a = tex1_v.rgb;
-    vec3 k_s = tex4_v.rgb;
-    vec3 k_d = tex0_v.rgb;
-    vec3 tbn_coord = tex2_v.rgb * 2 - 1;
-    float alpha = tex0_v.a;
-    float roughness = tex3_v.x;
-    float shininess = 2 / pow(roughness, 4) - 2;
+    k_a = tex1_v.rgb;
+    k_s = tex4_v.rgb;
+    k_d = tex0_v.rgb;
+    alpha = tex5_v.r;
+    shininess = tex3_v.r * 255;
 
-    vec3 n = normalize(normal);
+    n = normalize(normal);
     mat3 tbn = mat3(t, b, n);
+    vec3 tbn_coord = tex2_v.rgb * 2 - 1;
     n = normalize(tbn * tbn_coord);
 
-    vec3 pos_to_light = lpos - pos;
+    vec3 ambient = ambient_power * k_a;
+    vec3 light = ambient;
+    
+    for(int i=0; i<NR_DIR_LIGHTS; i++)
+        light += calc_dir_light(dir_lights[i]);
+    for(int i=0; i<NR_POINT_LIGHTS; i++)
+        light += calc_point_light(point_lights[i]);
+    
+    out_color = vec4(light, alpha);
+}
+
+vec3 calc_dir_light(dir_light light) {
+    
+    vec3 pos_to_light = light.dir;
+    vec3 pos_to_eye = cam_eye - pos;
+    vec3 pos_to_light_dir = normalize(pos_to_light);
+    vec3 pos_to_eye_dir = normalize(pos_to_eye);
+
+    vec3 half_vec = normalize(pos_to_eye_dir + pos_to_light_dir);
+    float glare = max(0.0, dot(n, half_vec));
+    
+    vec3 light_intensity = light.color * (light.power / light_coeff);
+
+    vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
+    vec3 specular = light_intensity * k_s * pow(glare, shininess);
+    
+    return diffuse + specular;
+}
+
+vec3 calc_point_light(point_light light) {
+    vec3 pos_to_light = light.pos - pos;
     vec3 pos_to_eye = cam_eye - pos;
     vec3 pos_to_light_dir = normalize(pos_to_light);
     vec3 pos_to_eye_dir = normalize(pos_to_eye);
@@ -67,10 +113,11 @@ void main() {
     vec3 half_vec = normalize(pos_to_eye_dir + pos_to_light_dir);
     float glare = max(0.0, dot(n, half_vec));
 
-    float dist_sq = pow(length(pos_to_light_dir), 2);
-    vec3 ambient = I_a * k_a;
-    vec3 diffuse = (I_l / dist_sq) * k_d * max(dot(n, pos_to_light_dir), 0.0);
-    vec3 specular = (I_l / dist_sq) * k_s * pow(glare, shininess);
-
-    out_color = vec4(ambient + diffuse + specular, alpha);
+    float dist_sq = pow(length(pos_to_light), 2);
+    vec3 light_intensity = light.color * (light.power / light_coeff) / dist_sq;
+    
+    vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
+    vec3 specular = light_intensity * k_s * pow(glare, shininess);
+    
+    return diffuse + specular;
 }

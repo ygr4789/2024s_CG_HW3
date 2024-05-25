@@ -32,11 +32,13 @@ class CustomGroup(pyglet.graphics.Group):
         u_image2Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture2".encode()))
         u_image3Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture3".encode()))
         u_image4Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture4".encode()))
+        u_image4Location = glGetUniformLocation(self.shader_program.id, ctypes.create_string_buffer("texture5".encode()))
         glUniform1i(u_image0Location, 0)
         glUniform1i(u_image1Location, 1)
         glUniform1i(u_image2Location, 2)
         glUniform1i(u_image3Location, 3)
         glUniform1i(u_image4Location, 4)
+        glUniform1i(u_image4Location, 5)
         
     def set_state(self):
         self.shader_program.use()
@@ -55,6 +57,8 @@ class CustomGroup(pyglet.graphics.Group):
             glBindTexture(self.textures["roughness"].target, self.textures["roughness"].id)
             glActiveTexture(GL_TEXTURE4)
             glBindTexture(self.textures["specular"].target, self.textures["specular"].id)
+            glActiveTexture(GL_TEXTURE5)
+            glBindTexture(self.textures["opacity"].target, self.textures["opacity"].id)
 
     def unset_state(self):
         self.shader_program.stop()
@@ -105,15 +109,5 @@ class Object3D:
             "normal" : self.material.normal,
             "roughness" : self.material.roughness,
             "specular" : self.material.specular,
+            "opacity" : self.material.opacity,
         }
-
-    def calc_transform_mat(self):
-        parent_transform_mat = Mat4()
-        if self.parent is not None:
-            parent_transform_mat = self.parent.group.transform_mat
-
-        self.group.transform_mat = (
-            parent_transform_mat @ self.translate_mat @ self.rotation_mat
-        )
-        for child in self.children:
-            child.calc_transform_mat()

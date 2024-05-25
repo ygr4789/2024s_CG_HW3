@@ -4,6 +4,7 @@ from pyglet.math import Mat4, Vec3, Vec4
 from pyglet.gl import *
 
 from object3d import Object3D
+from light import *
 from ui import UI
 
 class RenderWindow(pyglet.window.Window):
@@ -16,8 +17,8 @@ class RenderWindow(pyglet.window.Window):
         '''
         View (camera) parameters
         '''
-        self.cam_eye = Vec3(15,15,15)
-        self.cam_target = Vec3(0,0,0)
+        self.cam_eye = Vec3(5, 5, 5)
+        self.cam_target = Vec3(0, 0, 0)
         self.cam_vup = Vec3(0,1,0)
         self.view_mat = None
         '''
@@ -31,20 +32,23 @@ class RenderWindow(pyglet.window.Window):
         '''
         Uniforms (Lighting)
         '''
-        self.dir_light = Vec3(5,10,10)
+        self.ambient = 0
+        self.dir_lights: list[DirLight] = []
+        self.point_lights: list[PointLight] = []
         
         self.objects: list[Object3D] = []
         self.ui = UI(self)
         self.setup()
-
-
+    
     def setup(self) -> None:
         self.set_minimum_size(width = 400, height = 300)
         self.set_mouse_visible(True)
+        glEnable(GL_CULL_FACE)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glClearColor(0.1, 0.1, 0.1, 1)
+        glClearColor(1, 1, 1, 1)
         glEnable(GL_DEPTH_TEST)
+        glEnable(GL_LINE_SMOOTH)
         self.calc_matrices()
         
     def calc_matrices(self) -> None:
@@ -61,7 +65,7 @@ class RenderWindow(pyglet.window.Window):
         
         # 3. Calc a view_proj matrix
         self.view_proj = self.proj_mat @ self.view_mat
-
+        
     def on_draw(self) -> None:
         self.clear()
         self.batch.draw()
@@ -72,12 +76,20 @@ class RenderWindow(pyglet.window.Window):
         self.calc_matrices()
         return pyglet.event.EVENT_HANDLED
         
-    def add_object(self, object):
+    def add_object(self, object: Object3D):
         '''
         Assign a group for each object
         '''
         object.set_batch(self.batch)
         self.objects.append(object)
+        
+    def apply_lights(self, object: Object3D):
+        sp = object.group.shader_program
+        sp['ambient_power'] = self.ambient
+        for i, dir_light in enumerate(self.dir_lights):
+            dir_light.assign_to(sp, i)
+        for i, point_light in enumerate(self.point_lights):
+            point_light.assign_to(sp, i)
 
     def update(self,dt) -> None:
         for object in self.objects:
@@ -90,12 +102,10 @@ class RenderWindow(pyglet.window.Window):
             if(object.group is None):
                 self.objects.remove(object)
                 continue
-            if(object.parent is None):
-                object.calc_transform_mat()
                 
             object.group.shader_program['view_proj'] = self.view_proj
-            object.group.shader_program['lpos'] = self.dir_light
             object.group.shader_program['cam_eye'] = self.cam_eye
+            self.apply_lights(object)
         
     def fixed_update(self,dt) -> None:
         pass
