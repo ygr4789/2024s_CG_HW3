@@ -61,8 +61,6 @@ uniform point_light point_lights[NR_POINT_LIGHTS];
 
 float light_coeff = 40.0;
 
-#define M_PI 3.1415926535897932384626433832795
-
 void main() {
     vec4 tex0_v = texture2D(texture0, tex_coord); // diffuse
     vec4 tex1_v = texture2D(texture1, tex_coord); // ambient
@@ -79,7 +77,7 @@ void main() {
     
     float roughness = tex3_v.r + 0.0001;
     float alpha = pow(roughness, 2);
-    k_s /= (M_PI * 10 * pow(alpha, 2)); // custom roughness->specular conv
+    k_s /= (30 * pow(alpha, 2)); // custom roughness->specular conv
     shininess = 2 / pow(alpha, 2) - 2; // custom roughness->shininess conv
 
     n = normalize(normal);
@@ -100,7 +98,7 @@ void main() {
     for(int i=0; i<NR_POINT_LIGHTS; i++)
         light += calc_point_light(point_lights[i]);
     
-    out_color = vec4(light, opacity + oplus);
+    out_color = vec4(light, opacity + oplus / 2);
 }
 
 vec3 calc_dir_light(dir_light light) {
@@ -117,7 +115,8 @@ vec3 calc_dir_light(dir_light light) {
 
     vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
     vec3 specular = light_intensity * k_s * pow(glare, shininess);
-    vec3 reflect = light_intensity * k_m * pow(glare, 8);
+    vec3 reflect = light_intensity * k_m * pow(glare, 6);
+    oplus += specular.x;
     
     return diffuse + specular + reflect;
 }
@@ -136,7 +135,8 @@ vec3 calc_point_light(point_light light) {
     
     vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
     vec3 specular = light_intensity * k_s * pow(glare, shininess);
-    vec3 reflect = light_intensity * k_m * pow(glare, 8);
+    vec3 reflect = light_intensity * k_m * pow(glare, 6);
+    oplus += specular.x;
     
     return diffuse + specular + reflect;
 }

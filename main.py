@@ -9,8 +9,8 @@ from object3d import Object3D
 from engine import Engine
 
 if __name__ == '__main__':
-    width = 1280
-    height = 720
+    width = 1920
+    height = 1080
 
     # Render window.
     renderer = RenderWindow(width, height, "Shading", resizable = True)   

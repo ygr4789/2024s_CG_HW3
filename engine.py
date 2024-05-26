@@ -22,7 +22,6 @@ class Engine:
         self.setup()
 
     def setup(self):
-        # mesh_list = parse_obj("model/Free_rock/Free_rock.obj")
         mesh_list = parse_obj("model/Car/classic_car_2.obj")
         
         for mesh in mesh_list:

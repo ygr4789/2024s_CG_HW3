@@ -16,7 +16,7 @@ class RenderWindow(pyglet.window.Window):
         '''
         View (camera) parameters
         '''
-        self.cam_eye = Vec3(5, 5, 5)
+        self.cam_eye = Vec3(4, 1.5, 4)
         self.cam_target = Vec3(0, 0, 0)
         self.cam_vup = Vec3(0,1,0)
         self.view_mat = None
@@ -41,7 +41,7 @@ class RenderWindow(pyglet.window.Window):
     def setup(self) -> None:
         self.set_minimum_size(width = 400, height = 300)
         self.set_mouse_visible(True)
-        glEnable(GL_CULL_FACE)
+        # glEnable(GL_CULL_FACE)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glClearColor(0.1, 0.1, 0.1, 1)
