@@ -22,6 +22,7 @@ class Engine:
         self.setup()
 
     def setup(self):
+        # mesh_list = parse_obj("model/Free_rock/Free_rock.obj")
         mesh_list = parse_obj("model/Car/classic_car_2.obj")
         
         for mesh in mesh_list:
@@ -60,4 +61,6 @@ class Engine:
             self.renderer.point_lights.append(PointLight(pos, color, power))
 
     def fixed_update(self, dt):
+        # self.controller.disabled = True
+        # self.controller.rotate_screen(1, 0)
         pass
