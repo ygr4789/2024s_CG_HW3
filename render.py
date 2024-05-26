@@ -82,7 +82,7 @@ class RenderWindow(pyglet.window.Window):
         
     def apply_lights(self, object: Object3D):
         sp = object.group.shader_program
-        sp['ambient_power'] = self.ambient
+        sp['I_a'] = self.ambient
         for i, dir_light in enumerate(self.dir_lights):
             dir_light.assign_to(sp, i)
         for i, point_light in enumerate(self.point_lights):

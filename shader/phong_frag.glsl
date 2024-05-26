@@ -29,7 +29,6 @@ vec3 k_d;
 vec3 n;
 float shininess;
 float opacity;
-float oplus;
 
 vec3 k_m;
 float refl;
@@ -39,7 +38,7 @@ float refl;
 struct dir_light {
     vec3 dir;
     vec3 color;
-    float power;
+    float intensity;
 };
 
 struct point_light {
@@ -48,13 +47,15 @@ struct point_light {
     float power;
 };
 
-vec3 calc_dir_light(dir_light light);
-vec3 calc_point_light(point_light light);
+vec3 calc_dir_light(dir_light);
+vec3 calc_point_light(point_light);
+
+// uniforms
 
 #define NR_DIR_LIGHTS 4
 #define NR_POINT_LIGHTS 10
 
-uniform float ambient_power;
+uniform float I_a;
 uniform vec3 cam_eye;
 uniform dir_light dir_lights[NR_DIR_LIGHTS];
 uniform point_light point_lights[NR_POINT_LIGHTS];
@@ -90,7 +91,7 @@ void main() {
     k_m = refl * k_d;
     k_d *= (1 - refl);
 
-    vec3 ambient = ambient_power * k_a;
+    vec3 ambient = I_a * k_a;
     vec3 light = ambient;
     
     for(int i=0; i<NR_DIR_LIGHTS; i++)
@@ -98,11 +99,10 @@ void main() {
     for(int i=0; i<NR_POINT_LIGHTS; i++)
         light += calc_point_light(point_lights[i]);
     
-    out_color = vec4(light, opacity + oplus);
+    out_color = vec4(light, opacity);
 }
 
 vec3 calc_dir_light(dir_light light) {
-    
     vec3 pos_to_light = light.dir;
     vec3 pos_to_eye = cam_eye - pos;
     vec3 pos_to_light_dir = normalize(pos_to_light);
@@ -111,12 +111,12 @@ vec3 calc_dir_light(dir_light light) {
     vec3 half_vec = normalize(pos_to_eye_dir + pos_to_light_dir);
     float glare = max(0.0, dot(n, half_vec));
     
-    vec3 light_intensity = light.color * (light.power / light_coeff);
+    vec3 I_l = light.color * light.intensity;
 
-    vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
-    vec3 specular = light_intensity * k_s * pow(glare, shininess);
-    vec3 reflect = light_intensity * k_m * pow(glare, 8);
-    oplus += length(specular);
+    vec3 diffuse = I_l * k_d * max(dot(n, pos_to_light_dir), 0.0);
+    vec3 specular = I_l * k_s * pow(glare, shininess);
+    vec3 reflect = I_l * k_m * pow(glare, 8);
+    opacity += length(specular);
     
     return diffuse + specular + reflect;
 }
@@ -130,13 +130,13 @@ vec3 calc_point_light(point_light light) {
     vec3 half_vec = normalize(pos_to_eye_dir + pos_to_light_dir);
     float glare = max(0.0, dot(n, half_vec));
 
-    float dist_sq = pow(length(pos_to_light), 2);
-    vec3 light_intensity = light.color * (light.power / light_coeff) / dist_sq;
+    float dist_sq = dot(pos_to_light, pos_to_light);
+    vec3 I_l = light.color * (light.power / light_coeff) / dist_sq;
     
-    vec3 diffuse = light_intensity * k_d * max(dot(n, pos_to_light_dir), 0.0);
-    vec3 specular = light_intensity * k_s * pow(glare, shininess);
-    vec3 reflect = light_intensity * k_m * pow(glare, 8);
-    oplus += length(specular);
+    vec3 diffuse = I_l * k_d * max(dot(n, pos_to_light_dir), 0.0);
+    vec3 specular = I_l * k_s * pow(glare, shininess);
+    vec3 reflect = I_l * k_m * pow(glare, 8);
+    opacity += length(specular);
     
     return diffuse + specular + reflect;
 }
